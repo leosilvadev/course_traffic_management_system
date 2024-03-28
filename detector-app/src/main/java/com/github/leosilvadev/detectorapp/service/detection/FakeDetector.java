@@ -1,6 +1,7 @@
 package com.github.leosilvadev.detectorapp.service.detection;
 
 import com.github.leosilvadev.detectorapp.domain.Detection;
+import com.github.leosilvadev.detectorapp.domain.Equipment;
 import com.github.leosilvadev.detectorapp.domain.Lane;
 
 import java.time.Instant;
@@ -12,7 +13,10 @@ import java.util.function.Consumer;
 
 public class FakeDetector implements Detector {
 
+    private final Equipment equipment;
+
     private final Lane lane;
+
     private final Consumer<Detection> processor;
 
     private final ExecutorService executorService;
@@ -20,10 +24,12 @@ public class FakeDetector implements Detector {
     private final AtomicReference<Future<?>> detectionRunning;
 
     public FakeDetector(
+            final Equipment equipment,
             final Lane lane,
             final Consumer<Detection> processor,
             final ExecutorService executorService
     ) {
+        this.equipment = equipment;
         this.lane = lane;
         this.processor = processor;
         this.executorService = executorService;
@@ -44,7 +50,8 @@ public class FakeDetector implements Detector {
                                 "",
                                 100,
                                 Instant.now(),
-                                this.lane
+                                this.lane,
+                                this.equipment
                         )
                 );
             }

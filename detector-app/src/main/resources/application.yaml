@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: detector-app
+
+equipment:
+  id: "ff5b0042-96f4-42e8-a79d-8f423e9df348"
+  lng: 1
+  lat: 2
+  numberOfLanes: 2
