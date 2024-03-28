@@ -13,10 +13,6 @@ import java.util.function.Consumer;
 
 public class FakeDetector implements Detector {
 
-    private final Equipment equipment;
-
-    private final Lane lane;
-
     private final Consumer<Detection> processor;
 
     private final ExecutorService executorService;
@@ -24,13 +20,9 @@ public class FakeDetector implements Detector {
     private final AtomicReference<Future<?>> detectionRunning;
 
     public FakeDetector(
-            final Equipment equipment,
-            final Lane lane,
             final Consumer<Detection> processor,
             final ExecutorService executorService
     ) {
-        this.equipment = equipment;
-        this.lane = lane;
         this.processor = processor;
         this.executorService = executorService;
         this.detectionRunning = new AtomicReference<>();
@@ -49,9 +41,7 @@ public class FakeDetector implements Detector {
                                 UUID.randomUUID(),
                                 "",
                                 100,
-                                Instant.now(),
-                                this.lane,
-                                this.equipment
+                                Instant.now()
                         )
                 );
             }
