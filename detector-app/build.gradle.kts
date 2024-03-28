@@ -17,6 +17,7 @@ repositories {
 }
 
 dependencies {
+	implementation("org.apache.commons:commons-lang3:3.14.0")
 	implementation("org.springframework.boot:spring-boot-starter")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
