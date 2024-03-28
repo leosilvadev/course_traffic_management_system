@@ -1,4 +1,6 @@
 package com.github.leosilvadev.detectorapp.domain;
 
-public record Lane(int id) {
+import com.github.leosilvadev.detectorapp.service.detection.Detector;
+
+public record Lane(int id, Detector detector) {
 }
