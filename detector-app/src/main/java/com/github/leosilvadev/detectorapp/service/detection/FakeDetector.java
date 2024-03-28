@@ -1,10 +1,10 @@
 package com.github.leosilvadev.detectorapp.service.detection;
 
 import com.github.leosilvadev.detectorapp.domain.Detection;
-import com.github.leosilvadev.detectorapp.domain.Equipment;
-import com.github.leosilvadev.detectorapp.domain.Lane;
+import com.github.leosilvadev.detectorapp.domain.Plate;
 
 import java.time.Instant;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -19,6 +19,8 @@ public class FakeDetector implements Detector {
 
     private final AtomicReference<Future<?>> detectionRunning;
 
+    private final Random random;
+
     public FakeDetector(
             final Consumer<Detection> processor,
             final ExecutorService executorService
@@ -26,6 +28,7 @@ public class FakeDetector implements Detector {
         this.processor = processor;
         this.executorService = executorService;
         this.detectionRunning = new AtomicReference<>();
+        this.random = new Random();
     }
 
     @Override
@@ -39,11 +42,16 @@ public class FakeDetector implements Detector {
                 processor.accept(
                         new Detection(
                                 UUID.randomUUID(),
-                                "",
-                                100,
+                                Plate.generate(),
+                                random.nextDouble(50.0, 100.0),
                                 Instant.now()
                         )
                 );
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
