@@ -6,6 +6,7 @@ import com.github.leosilvadev.detectorapp.domain.Plate;
 import java.time.Instant;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
@@ -37,8 +38,9 @@ public class FakeDetector implements Detector {
             return;
         }
 
-        final var execution = executorService.submit(() -> {
-            while (this.detectionRunning.get() != null && !this.detectionRunning.get().isCancelled()) {
+        final var execution = CompletableFuture.runAsync(() -> {
+            final var running = this.detectionRunning.get();
+            while (running == null || !this.detectionRunning.get().isCancelled()) {
                 processor.accept(
                         new Detection(
                                 UUID.randomUUID(),
@@ -53,9 +55,12 @@ public class FakeDetector implements Detector {
                     throw new RuntimeException(e);
                 }
             }
-        });
+        }, executorService);
 
-        this.detectionRunning.set(execution);
+        this.detectionRunning.set(execution.exceptionally(ex -> {
+            ex.printStackTrace();
+            return null;
+        }));
     }
 
     @Override
