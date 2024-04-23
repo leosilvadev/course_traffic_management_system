@@ -1,10 +1,12 @@
 package com.github.leosilvadev.detectorapp.repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leosilvadev.detectorapp.domain.Detection;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestClient;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 @Repository
@@ -27,7 +29,7 @@ public class ExternalDetectionRepository implements DetectionRepository {
         return detection;
     }
 
-    private record DetectionRegistration(UUID id, UUID equipmentId, double speed) {
+    public record DetectionRegistration(UUID id, UUID equipmentId, double speed) implements Serializable {
     }
 
 }
