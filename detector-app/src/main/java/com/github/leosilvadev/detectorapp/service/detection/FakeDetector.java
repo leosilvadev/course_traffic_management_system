@@ -2,6 +2,7 @@ package com.github.leosilvadev.detectorapp.service.detection;
 
 import com.github.leosilvadev.detectorapp.domain.Detection;
 import com.github.leosilvadev.detectorapp.domain.Plate;
+import com.github.leosilvadev.detectorapp.service.processor.Processor;
 
 import java.time.Instant;
 import java.util.Random;
@@ -14,21 +15,21 @@ import java.util.function.Consumer;
 
 public class FakeDetector implements Detector {
 
-    private final Consumer<Detection> processor;
+    private final Processor<Detection> processor;
 
     private final ExecutorService executorService;
 
-    private final AtomicReference<Future<?>> detectionRunning;
+    private final AtomicReference<Future<?>> activeDetectionExecution;
 
     private final Random random;
 
     public FakeDetector(
-            final Consumer<Detection> processor,
+            final Processor<Detection> processor,
             final ExecutorService executorService
     ) {
         this.processor = processor;
         this.executorService = executorService;
-        this.detectionRunning = new AtomicReference<>();
+        this.activeDetectionExecution = new AtomicReference<>();
         this.random = new Random();
     }
 
@@ -38,34 +39,34 @@ public class FakeDetector implements Detector {
             return;
         }
 
-        final var execution = CompletableFuture.runAsync(() -> {
-            final var running = this.detectionRunning.get();
-            while (running == null || !this.detectionRunning.get().isCancelled()) {
-                processor.accept(
-                        new Detection(
-                                UUID.randomUUID(),
-                                Plate.generate(),
-                                random.nextDouble(50.0, 100.0),
-                                Instant.now()
-                        )
-                );
+        final var execution = executorService.submit(() -> {
+            final var currentThread = Thread.currentThread();
+            while (currentThread.isAlive()) {
                 try {
                     Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+
+                    processor.onEvent(
+                            new Detection(
+                                    UUID.randomUUID(),
+                                    Plate.generate(),
+                                    random.nextDouble(50.0, 100.0),
+                                    Instant.now()
+                            )
+                    );
+
+                } catch (final Throwable ex) {
+                    processor.onError(ex);
+
                 }
             }
-        }, executorService);
+        });
 
-        this.detectionRunning.set(execution.exceptionally(ex -> {
-            ex.printStackTrace();
-            return null;
-        }));
+        this.activeDetectionExecution.set(execution);
     }
 
     @Override
     public void stop() {
-        final var processRunning = this.detectionRunning.get();
+        final var processRunning = this.activeDetectionExecution.get();
         if (processRunning != null) {
             processRunning.cancel(true);
         }
@@ -73,7 +74,7 @@ public class FakeDetector implements Detector {
 
     @Override
     public boolean isRunning() {
-        final var processRunning = this.detectionRunning.get();
-        return processRunning != null && !processRunning.isCancelled();
+        final var processRunning = this.activeDetectionExecution.get();
+        return processRunning != null && (!processRunning.isCancelled() && !processRunning.isDone());
     }
 }
