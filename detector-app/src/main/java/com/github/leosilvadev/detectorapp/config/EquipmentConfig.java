@@ -3,6 +3,7 @@ package com.github.leosilvadev.detectorapp.config;
 import com.github.leosilvadev.detectorapp.domain.Detection;
 import com.github.leosilvadev.detectorapp.domain.Equipment;
 import com.github.leosilvadev.detectorapp.domain.Lane;
+import com.github.leosilvadev.detectorapp.domain.Plate;
 import com.github.leosilvadev.detectorapp.repository.DetectionRepository;
 import com.github.leosilvadev.detectorapp.service.detection.FakeDetector;
 import com.github.leosilvadev.detectorapp.service.processor.DetectionProcessor;
@@ -13,7 +14,12 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
@@ -39,9 +45,26 @@ public class EquipmentConfig {
     }
 
     @Bean
-    public Equipment equipment(final Processor<Detection> processor) {
+    public Flux<Long> detectionTrigger() {
+        return Mono.delay(Duration.ofMillis(500)) // 1L
+                .repeat();
+    }
+
+    @Bean
+    public Flux<Detection> detectionGenerator(final Flux<Long> detectionTrigger) {
+        final var random = new Random();
+        return detectionTrigger.map(__ -> new Detection(
+                UUID.randomUUID(),
+                Plate.generate(),
+                random.nextDouble(50.0, 100.0),
+                Instant.now()
+        ));
+    }
+
+    @Bean
+    public Equipment equipment(final Flux<Detection> detectionGenerator, final Processor<Detection> processor) {
         final var lanes = IntStream.range(0, equipmentProperties.numberOfLanes())
-                .mapToObj(id -> new Lane(id, new FakeDetector(processor, Executors.newSingleThreadExecutor())))
+                .mapToObj(id -> new Lane(id, new FakeDetector(detectionGenerator, processor, Executors.newSingleThreadExecutor())))
                 .toList();
 
         return new Equipment(
