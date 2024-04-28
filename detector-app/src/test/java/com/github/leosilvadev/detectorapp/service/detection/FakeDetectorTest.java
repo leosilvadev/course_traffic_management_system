@@ -7,6 +7,7 @@ import com.github.leosilvadev.detectorapp.service.processor.Processor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import reactor.core.publisher.Flux;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -23,6 +24,7 @@ public class FakeDetectorTest {
     @Test
     public void shouldStartDetectorIfNotYetStarted() {
         final var detector = new FakeDetector(
+                Flux.empty(),
                 new Processor<>() {
                     @Override
                     public Detection onEvent(Detection event) {
@@ -55,6 +57,7 @@ public class FakeDetectorTest {
                 .thenReturn(new Detection(UUID.randomUUID(), Plate.generate(), 100, Instant.now()));
 
         final var detector = new FakeDetector(
+                Flux.empty(),
                 mock,
                 Executors.newSingleThreadExecutor()
         );
