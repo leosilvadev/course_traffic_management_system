@@ -35,9 +35,9 @@ public class FakeDetector implements Detector {
     }
 
     @Override
-    public void start() {
+    public Disposable start() {
         if (this.isRunning()) {
-            return;
+            return this.activeDetectionExecution.get();
         }
 
         final var disposable = detectionGenerator.map(processor::onEvent)
@@ -46,6 +46,7 @@ public class FakeDetector implements Detector {
                 .subscribe();
 
         this.activeDetectionExecution.set(disposable);
+        return disposable;
     }
 
     @Override

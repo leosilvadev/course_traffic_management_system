@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import reactor.core.publisher.Flux;
+import support.Wait;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -42,7 +43,7 @@ class DetectorAppApplicationTests {
 	}
 
 	@Test
-	void shouldStartTheAppGenerateSomeDetectionsAndSendThemToTheApi() throws InterruptedException {
+	void shouldStartTheAppGenerateSomeDetectionsAndSendThemToTheApi() {
 		final var expectedBody = new ExternalDetectionRepository.DetectionRegistration(
 			Config.DEFAULT_DETECTION.id(),
 			this.equipmentId,
@@ -58,9 +59,9 @@ class DetectorAppApplicationTests {
 				response().withStatusCode(201)
 		);
 
-		starter.start();
+		final var disposables = starter.start();
 
-		Thread.sleep(500);
+		Wait.untilAllAreCompleted(disposables);
 
 		clientAndServer.verify(expectations[0].getId(), VerificationTimes.exactly(1));
 	}
