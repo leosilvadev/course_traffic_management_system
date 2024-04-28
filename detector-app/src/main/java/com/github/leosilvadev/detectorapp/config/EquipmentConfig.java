@@ -19,38 +19,45 @@ import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 @Configuration
-@EnableConfigurationProperties(EquipmentConfig.EquipmentProperties.class)
+@EnableConfigurationProperties({EquipmentConfig.ApiProperties.class, EquipmentConfig.EquipmentProperties.class})
 public class EquipmentConfig {
 
     @Autowired
-    private EquipmentProperties properties;
+    private EquipmentProperties equipmentProperties;
+
+    @Autowired
+    private ApiProperties apiProperties;
 
     @Bean
     public RestClient restClient() {
-        return RestClient.builder().baseUrl("http://localhost:8080").build();
+        return RestClient.builder().baseUrl(apiProperties.url()).build();
     }
 
     @Bean
     public Processor<Detection> detectionProcessor(final DetectionRepository repository) {
-        return new DetectionProcessor(properties.id(), repository);
+        return new DetectionProcessor(equipmentProperties.id(), repository);
     }
 
     @Bean
     public Equipment equipment(final Processor<Detection> processor) {
-        final var lanes = IntStream.range(0, properties.numberOfLanes())
+        final var lanes = IntStream.range(0, equipmentProperties.numberOfLanes())
                 .mapToObj(id -> new Lane(id, new FakeDetector(processor, Executors.newSingleThreadExecutor())))
                 .toList();
 
         return new Equipment(
-                properties.id(),
-                properties.lat(),
-                properties.lng(),
+                equipmentProperties.id(),
+                equipmentProperties.lat(),
+                equipmentProperties.lng(),
                 lanes
         );
     }
 
     @ConfigurationProperties(prefix = "equipment")
     record EquipmentProperties(UUID id, long lat, long lng, int numberOfLanes) {
+    }
+
+    @ConfigurationProperties(prefix = "api")
+    record ApiProperties(String url) {
     }
 
 }
