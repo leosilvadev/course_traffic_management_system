@@ -51,13 +51,14 @@ public class FakeDetectorTest {
     @Test
     public void shouldThrowAnErrorDuringProcessingButKeepRunning() throws InterruptedException {
         final var mock = mock(DetectionProcessor.class);
+        final var detection = new Detection(UUID.randomUUID(), Plate.generate(), 100, Instant.now());
 
         when(mock.onEvent(any(Detection.class)))
                 .thenThrow(RuntimeException.class)
-                .thenReturn(new Detection(UUID.randomUUID(), Plate.generate(), 100, Instant.now()));
+                .thenReturn(detection);
 
         final var detector = new FakeDetector(
-                Flux.empty(),
+                Flux.just(detection, detection, detection),
                 mock,
                 Executors.newSingleThreadExecutor()
         );
