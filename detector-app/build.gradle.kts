@@ -22,6 +22,7 @@ dependencies {
 	implementation("org.springframework:spring-web")
 	implementation("com.fasterxml.jackson.core:jackson-databind")
 	implementation("io.projectreactor:reactor-core")
+	implementation("org.springframework.boot:spring-boot-starter-artemis")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.mock-server:mockserver-junit-jupiter:5.15.0")
 }

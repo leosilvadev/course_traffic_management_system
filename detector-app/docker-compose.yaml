@@ -1,0 +1,15 @@
+version: '2'
+services:
+  node0:
+    image: apache/activemq-artemis:2.33.0-alpine
+    volumes:
+      - ./artemis/data:/var/lib/artemis-instance
+    environment:
+      ENABLE_JMX_EXPORTER: "true"
+      ARTEMIS_MIN_MEMORY: "1512M"
+      ARTEMIS_MAX_MEMORY: "2000M"
+      ARTEMIS_USER: "trafficmonitoring"
+      ARTEMIS_PASSWORD: "trafficmonitoring"
+    ports:
+      - "8161:8161"
+      - "61616:61616"

@@ -76,7 +76,11 @@ public class EquipmentConfig {
     }
 
     @ConfigurationProperties(prefix = "equipment")
-    record EquipmentProperties(UUID id, long lat, long lng, int numberOfLanes) {
+    record EquipmentProperties(UUID id, long lat, long lng, int numberOfLanes, Mode mode) {
+    }
+
+    enum Mode {
+        STATEFUL, STATELESS
     }
 
     @ConfigurationProperties(prefix = "api")
