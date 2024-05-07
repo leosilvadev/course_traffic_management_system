@@ -3,8 +3,16 @@ spring:
     allow-bean-definition-overriding: true
   application:
     name: detector-app
+  artemis:
+    embedded:
+      enabled: false
+    host: localhost
+    port: 61616
+    user: trafficmonitoring
+    password: trafficmonitoring
 
 equipment:
+  mode: "STATEFUL"
   id: "ff5b0042-96f4-42e8-a79d-8f423e9df348"
   lng: 1
   lat: 2
