@@ -6,7 +6,7 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.Random;
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -20,8 +20,6 @@ public class FakeDetector implements Detector {
 
     private final AtomicReference<Disposable> activeDetectionExecution;
 
-    private final Random random;
-
     public FakeDetector(
             final Flux<Detection> detectionGenerator,
             final Processor<Detection> processor,
@@ -31,7 +29,6 @@ public class FakeDetector implements Detector {
         this.processor = processor;
         this.executorService = executorService;
         this.activeDetectionExecution = new AtomicReference<>();
-        this.random = new Random();
     }
 
     @Override
@@ -40,7 +37,9 @@ public class FakeDetector implements Detector {
             return this.activeDetectionExecution.get();
         }
 
-        final var disposable = detectionGenerator.map(processor::onEvent)
+        final var disposable = detectionGenerator
+                .bufferTimeout(10, Duration.ofMinutes(1))
+                .map(processor::onEvents)
                 .onErrorContinue((ex, __) -> processor.onError(ex))
                 .subscribeOn(Schedulers.fromExecutor(executorService))
                 .subscribe();

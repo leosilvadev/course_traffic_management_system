@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import reactor.core.publisher.Flux;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,6 +29,11 @@ public class FakeDetectorTest {
                 new Processor<>() {
                     @Override
                     public Detection onEvent(Detection event) {
+                        return null;
+                    }
+
+                    @Override
+                    public List<Detection> onEvents(List<Detection> events) {
                         return null;
                     }
 

@@ -3,6 +3,7 @@ package com.github.leosilvadev.detectorapp.service.processor;
 import com.github.leosilvadev.detectorapp.domain.Detection;
 import com.github.leosilvadev.detectorapp.repository.DetectionRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 public class DetectionProcessor implements Processor<Detection> {
@@ -21,6 +22,12 @@ public class DetectionProcessor implements Processor<Detection> {
         System.out.println("Trying to register a detection...");
         repository.register(this.equipmentId, detection);
         return detection;
+    }
+
+    @Override
+    public List<Detection> onEvents(final List<Detection> detections) {
+        repository.registerMany(this.equipmentId, detections);
+        return detections;
     }
 
     @Override
