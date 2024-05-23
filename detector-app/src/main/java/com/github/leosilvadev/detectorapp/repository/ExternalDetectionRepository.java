@@ -1,11 +1,11 @@
 package com.github.leosilvadev.detectorapp.repository;
 
 import com.github.leosilvadev.detectorapp.domain.Detection;
+import com.github.leosilvadev.detectorapp.domain.DetectionBatchRegistration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestClient;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,23 +20,10 @@ public class ExternalDetectionRepository implements DetectionRepository {
     }
 
     @Override
-    public Detection register(final UUID equipmentId, final Detection detection) {
-        System.out.println("Registering via API V1...");
-        final var registration = new DetectionRegistration(detection.id(), equipmentId, detection.speed());
-        client.post()
-                .uri("/v1/detections")
-                .body(registration)
-                .retrieve()
-                .toBodilessEntity();
-
-        return detection;
-    }
-
-    @Override
     public List<Detection> registerMany(final UUID equipmentId, final List<Detection> detections) {
         System.out.println("Registering via API V2...");
         final var registrations = detections.stream()
-                .map(detection -> new DetectionRegistration(detection.id(), equipmentId, detection.speed()))
+                .map(detection -> new DetectionBatchRegistration.DetectionRegistration(detection.id(), equipmentId, detection.speed()))
                 .toList();
 
         final var registration = new DetectionBatchRegistration(registrations);
@@ -48,14 +35,6 @@ public class ExternalDetectionRepository implements DetectionRepository {
                 .toBodilessEntity();
 
         return detections;
-    }
-
-    public record DetectionRegistration(UUID id, UUID equipmentId, double speed) implements Serializable {
-    }
-
-    public record DetectionBatchRegistration(
-            List<DetectionRegistration> detections
-    ) implements Serializable {
     }
 
 }

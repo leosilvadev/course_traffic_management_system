@@ -1,6 +1,7 @@
 package com.github.leosilvadev.detectorapp.repository;
 
 import com.github.leosilvadev.detectorapp.domain.Detection;
+import com.github.leosilvadev.detectorapp.domain.DetectionBatchRegistration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Repository;
@@ -20,21 +21,13 @@ public class QueuedDetectionRepository implements DetectionRepository {
     }
 
     @Override
-    public Detection register(final UUID equipmentId, final Detection detection) {
-        System.out.println("Enqueuing a detection...");
-        final var registration = new ExternalDetectionRepository.DetectionRegistration(detection.id(), equipmentId, detection.speed());
-        jmsTemplate.convertAndSend("detection-registrations", registration);
-        return detection;
-    }
-
-    @Override
     public List<Detection> registerMany(final UUID equipmentId, final List<Detection> detections) {
         System.out.println("Enqueuing a batch of detections...");
         final var registrations = detections.stream()
-                .map(detection -> new ExternalDetectionRepository.DetectionRegistration(detection.id(), equipmentId, detection.speed()))
+                .map(detection -> new DetectionBatchRegistration.DetectionRegistration(detection.id(), equipmentId, detection.speed()))
                 .toList();
 
-        final var registration = new ExternalDetectionRepository.DetectionBatchRegistration(registrations);
+        final var registration = new DetectionBatchRegistration(registrations);
         jmsTemplate.convertAndSend("detection-registrations-batch", registration);
         return detections;
     }

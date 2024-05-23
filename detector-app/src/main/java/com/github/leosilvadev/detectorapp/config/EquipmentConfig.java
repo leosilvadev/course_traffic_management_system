@@ -5,6 +5,7 @@ import com.github.leosilvadev.detectorapp.domain.Equipment;
 import com.github.leosilvadev.detectorapp.domain.Lane;
 import com.github.leosilvadev.detectorapp.domain.Plate;
 import com.github.leosilvadev.detectorapp.repository.DetectionRepository;
+import com.github.leosilvadev.detectorapp.service.detection.Detector;
 import com.github.leosilvadev.detectorapp.service.detection.FakeDetector;
 import com.github.leosilvadev.detectorapp.service.processor.DetectionProcessor;
 import com.github.leosilvadev.detectorapp.service.processor.Processor;
@@ -64,7 +65,9 @@ public class EquipmentConfig {
     @Bean
     public Equipment equipment(final Flux<Detection> detectionGenerator, final Processor<Detection> processor) {
         final var lanes = IntStream.range(0, equipmentProperties.numberOfLanes())
-                .mapToObj(id -> new Lane(id, new FakeDetector(detectionGenerator, processor, Executors.newSingleThreadExecutor())))
+                .mapToObj(id -> new Lane(id, new FakeDetector(
+                        detectionGenerator, processor, Executors.newSingleThreadExecutor(), new Detector.DetectionBufferSpec(10, Duration.ofMinutes(1))
+                )))
                 .toList();
 
         return new Equipment(

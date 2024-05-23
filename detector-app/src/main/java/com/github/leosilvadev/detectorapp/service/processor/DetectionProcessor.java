@@ -18,13 +18,6 @@ public class DetectionProcessor implements Processor<Detection> {
     }
 
     @Override
-    public Detection onEvent(final Detection detection) {
-        System.out.println("Trying to register a detection...");
-        repository.register(this.equipmentId, detection);
-        return detection;
-    }
-
-    @Override
     public List<Detection> onEvents(final List<Detection> detections) {
         repository.registerMany(this.equipmentId, detections);
         return detections;
