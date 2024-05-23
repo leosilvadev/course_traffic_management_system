@@ -1,4 +1,6 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: detector-app
   artemis:
@@ -10,7 +12,7 @@ spring:
     password: trafficmonitoring
 
 equipment:
-  mode: "STATEFUL"
+  mode: "STATELESS"
   id: "ff5b0042-96f4-42e8-a79d-8f423e9df348"
   lng: 1
   lat: 2

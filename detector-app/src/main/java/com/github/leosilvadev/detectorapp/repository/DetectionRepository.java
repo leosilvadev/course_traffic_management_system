@@ -7,8 +7,6 @@ import java.util.UUID;
 
 public interface DetectionRepository {
 
-    public Detection register(UUID equipmentId, Detection detection);
-
     public List<Detection> registerMany(UUID equipmentId, List<Detection> detections);
 
 

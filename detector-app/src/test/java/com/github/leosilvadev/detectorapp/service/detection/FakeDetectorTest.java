@@ -4,16 +4,14 @@ import com.github.leosilvadev.detectorapp.domain.Detection;
 import com.github.leosilvadev.detectorapp.domain.Plate;
 import com.github.leosilvadev.detectorapp.service.processor.DetectionProcessor;
 import com.github.leosilvadev.detectorapp.service.processor.Processor;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import reactor.core.publisher.Flux;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,10 +25,6 @@ public class FakeDetectorTest {
         final var detector = new FakeDetector(
                 Flux.empty(),
                 new Processor<>() {
-                    @Override
-                    public Detection onEvent(Detection event) {
-                        return null;
-                    }
 
                     @Override
                     public List<Detection> onEvents(List<Detection> events) {
@@ -42,7 +36,8 @@ public class FakeDetectorTest {
 
                     }
                 },
-                Executors.newSingleThreadExecutor()
+                Executors.newSingleThreadExecutor(),
+                new Detector.DetectionBufferSpec(1, Duration.ofMinutes(1))
         );
 
         detector.start();
@@ -59,14 +54,15 @@ public class FakeDetectorTest {
         final var mock = mock(DetectionProcessor.class);
         final var detection = new Detection(UUID.randomUUID(), Plate.generate(), 100, Instant.now());
 
-        when(mock.onEvent(any(Detection.class)))
+        when(mock.onEvents(any()))
                 .thenThrow(RuntimeException.class)
-                .thenReturn(detection);
+                .thenReturn(List.of(detection));
 
         final var detector = new FakeDetector(
                 Flux.just(detection, detection, detection),
                 mock,
-                Executors.newSingleThreadExecutor()
+                Executors.newSingleThreadExecutor(),
+                new Detector.DetectionBufferSpec(1, Duration.ofMinutes(1))
         );
 
         detector.start();
@@ -80,7 +76,7 @@ public class FakeDetectorTest {
         assertFalse(detector.isRunning());
 
         verify(mock, times(1)).onError(any(RuntimeException.class));
-        verify(mock, atLeast(3)).onEvent(any(Detection.class));
+        verify(mock, atLeast(3)).onEvents(any());
     }
 
 }
