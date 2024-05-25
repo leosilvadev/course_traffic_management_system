@@ -3,6 +3,7 @@ package com.github.leosilvadev.detectorapp.repository;
 import com.github.leosilvadev.detectorapp.domain.Detection;
 import com.github.leosilvadev.detectorapp.domain.DetectionBatchRegistration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -11,6 +12,7 @@ import java.util.UUID;
 
 
 @Repository
+@Primary
 @ConditionalOnProperty(prefix = "equipment", value = "mode", havingValue = "stateful")
 public class QueuedDetectionRepository implements DetectionRepository {
 

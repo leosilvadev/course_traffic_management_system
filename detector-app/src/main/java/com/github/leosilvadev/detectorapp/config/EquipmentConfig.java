@@ -9,6 +9,7 @@ import com.github.leosilvadev.detectorapp.service.detection.Detector;
 import com.github.leosilvadev.detectorapp.service.detection.FakeDetector;
 import com.github.leosilvadev.detectorapp.service.processor.DetectionProcessor;
 import com.github.leosilvadev.detectorapp.service.processor.Processor;
+import com.github.leosilvadev.detectorapp.support.compression.CompressingClientHttpRequestInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -37,7 +38,9 @@ public class EquipmentConfig {
 
     @Bean
     public RestClient restClient() {
-        return RestClient.builder().baseUrl(apiProperties.url()).build();
+        return RestClient.builder().baseUrl(apiProperties.url())
+                .requestInterceptor(new CompressingClientHttpRequestInterceptor())
+                .build();
     }
 
     @Bean
